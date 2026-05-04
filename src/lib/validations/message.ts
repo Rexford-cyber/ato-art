@@ -5,7 +5,7 @@ export const sendMessageSchema = z.object({
 });
 
 export const newConversationSchema = z.object({
-  recipientId: z.string().cuid(),
+  recipientId: z.string().min(1),
   initialMessage: z.string().min(1).max(2000),
 });
 

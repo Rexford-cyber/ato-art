@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { artworkSchema } from "@/lib/validations/artwork";
 import { generateUniqueSlug } from "@/lib/utils/slug";
-import { ArtworkStatus } from "@prisma/client";
+import { ArtworkStatus } from "@/constants/enums";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const parsed = artworkSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Validation error" }, { status: 400 });
   }
 
   const { images, tags, ...data } = parsed.data;
@@ -81,11 +81,24 @@ export async function POST(req: NextRequest) {
 
   const submit = body.submit === true;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const artwork = await prisma.artwork.create({
     data: {
-      ...data,
       slug,
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      currency: data.currency,
+      medium: data.medium as import("@prisma/client").MediumType,
+      style: data.style as import("@prisma/client").StyleType,
+      categoryId: data.categoryId,
       artistId: session.user.id,
+      isOriginal: data.isOriginal,
+      stockCount: data.stockCount,
+      isDigital: data.isDigital,
+      width: data.width,
+      height: data.height,
+      year: data.year,
       status: submit ? "PENDING" : "DRAFT",
       submittedAt: submit ? new Date() : null,
       images: {

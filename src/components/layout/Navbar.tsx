@@ -73,39 +73,31 @@ export default function Navbar() {
 
             {session ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={session.user.image ?? undefined} />
-                      <AvatarFallback>{initials}</AvatarFallback>
-                    </Avatar>
-                  </Button>
+                <DropdownMenuTrigger className="relative rounded-full focus-visible:ring-2 focus-visible:ring-ring outline-none">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.user.image ?? undefined} />
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-2 py-1.5 text-sm font-medium">{session.user.name}</div>
                   <div className="px-2 pb-1.5 text-xs text-muted-foreground">{session.user.email}</div>
                   <DropdownMenuSeparator />
                   {(session.user.role === "ARTIST" || session.user.role === "ADMIN") && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/artist/dashboard">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Artist Dashboard
-                      </Link>
+                    <DropdownMenuItem render={<Link href="/artist/dashboard" />}>
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Artist Dashboard
                     </DropdownMenuItem>
                   )}
                   {session.user.role === "ADMIN" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/dashboard">
-                        <Shield className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </Link>
+                    <DropdownMenuItem render={<Link href="/admin/dashboard" />}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin Panel
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/buyer/orders">
-                      <User className="mr-2 h-4 w-4" />
-                      My Orders
-                    </Link>
+                  <DropdownMenuItem render={<Link href="/buyer/orders" />}>
+                    <User className="mr-2 h-4 w-4" />
+                    My Orders
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -130,10 +122,8 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
+              <SheetTrigger render={<button className="inline-flex items-center justify-center rounded-md p-2 text-sm hover:bg-muted md:hidden" />}>
+                <Menu className="h-5 w-5" />
               </SheetTrigger>
               <SheetContent side="right" className="w-64">
                 <div className="flex flex-col gap-4 pt-6">

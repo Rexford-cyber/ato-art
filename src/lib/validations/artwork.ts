@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { MediumType, StyleType } from "@prisma/client";
+import { MediumType, StyleType } from "@/constants/enums";
 
 export const artworkSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().min(10).max(5000),
   price: z.coerce.number().positive().max(1_000_000),
   currency: z.enum(["GHS", "NGN", "USD"]).default("GHS"),
-  categoryId: z.string().cuid(),
-  medium: z.nativeEnum(MediumType),
-  style: z.nativeEnum(StyleType),
+  categoryId: z.string().min(1),
+  medium: z.enum(Object.values(MediumType) as [string, ...string[]]),
+  style: z.enum(Object.values(StyleType) as [string, ...string[]]),
   width: z.coerce.number().positive().optional(),
   height: z.coerce.number().positive().optional(),
   year: z.coerce.number().int().min(1800).max(new Date().getFullYear()).optional(),

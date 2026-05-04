@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ImageUploader, { type UploadedImage } from "@/components/artworks/ImageUploader";
 import { artworkSchema, type ArtworkInput } from "@/lib/validations/artwork";
-import { MediumType, StyleType } from "@prisma/client";
+import { MediumType, StyleType } from "@/constants/enums";
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -33,7 +33,7 @@ export default function UploadArtworkPage() {
     setValue,
     formState: { errors },
   } = useForm<ArtworkInput>({
-    resolver: zodResolver(artworkSchema),
+    resolver: zodResolver(artworkSchema) as import("react-hook-form").Resolver<ArtworkInput>,
     defaultValues: { currency: "GHS", isOriginal: true, isDigital: false, stockCount: 1, tags: [] },
   });
 
@@ -100,7 +100,7 @@ export default function UploadArtworkPage() {
           </div>
           <div className="space-y-1">
             <Label>Currency</Label>
-            <Select defaultValue="GHS" onValueChange={(v) => setValue("currency", v as "GHS")}>
+            <Select defaultValue="GHS" onValueChange={(v) => setValue("currency", v as "GHS" | "NGN" | "USD")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="GHS">GHS</SelectItem>
@@ -114,7 +114,7 @@ export default function UploadArtworkPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <Label>Category <span className="text-destructive">*</span></Label>
-            <Select onValueChange={(v) => setValue("categoryId", v)}>
+            <Select onValueChange={(v) => setValue("categoryId", v as string)}>
               <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
               <SelectContent>
                 {categories.map((c: { id: string; name: string }) => (
@@ -126,7 +126,7 @@ export default function UploadArtworkPage() {
           </div>
           <div className="space-y-1">
             <Label>Medium <span className="text-destructive">*</span></Label>
-            <Select onValueChange={(v) => setValue("medium", v as MediumType)}>
+            <Select onValueChange={(v) => setValue("medium", v as string)}>
               <SelectTrigger><SelectValue placeholder="Select medium" /></SelectTrigger>
               <SelectContent>
                 {Object.values(MediumType).map((m) => (
@@ -140,7 +140,7 @@ export default function UploadArtworkPage() {
 
         <div className="space-y-1">
           <Label>Style <span className="text-destructive">*</span></Label>
-          <Select onValueChange={(v) => setValue("style", v as StyleType)}>
+          <Select onValueChange={(v) => setValue("style", v as string)}>
             <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
             <SelectContent>
               {Object.values(StyleType).map((s) => (
@@ -171,14 +171,14 @@ export default function UploadArtworkPage() {
             type="button"
             variant="outline"
             disabled={saving}
-            onClick={handleSubmit((d) => save(d, false))}
+            onClick={handleSubmit((d) => save(d as ArtworkInput, false))}
           >
             {saving ? "Saving…" : "Save as Draft"}
           </Button>
           <Button
             type="button"
             disabled={submitting}
-            onClick={handleSubmit((d) => save(d, true))}
+            onClick={handleSubmit((d) => save(d as ArtworkInput, true))}
           >
             {submitting ? "Submitting…" : "Submit for Review"}
           </Button>

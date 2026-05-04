@@ -22,27 +22,29 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const cursor = req.nextUrl.searchParams.get("cursor");
+  const cursor = req.nextUrl.searchParams.get("cursor"); // for loading older messages
+  const after = req.nextUrl.searchParams.get("after");   // for polling newer messages
   const limit = 20;
 
   const messages = await prisma.message.findMany({
     where: {
       conversationId: id,
       ...(cursor ? { createdAt: { lt: new Date(cursor) } } : {}),
+      ...(after ? { createdAt: { gt: new Date(after) } } : {}),
     },
-    orderBy: { createdAt: "desc" },
-    take: limit,
+    orderBy: { createdAt: after ? "asc" : "desc" },
+    take: after ? undefined : limit,
     include: {
       sender: { select: { id: true, name: true, username: true, avatarUrl: true } },
     },
   });
 
   const nextCursor =
-    messages.length === limit
+    !after && messages.length === limit
       ? messages[messages.length - 1].createdAt.toISOString()
       : null;
 
-  return NextResponse.json({ messages: messages.reverse(), nextCursor });
+  return NextResponse.json({ messages: after ? messages : messages.reverse(), nextCursor });
 }
 
 export async function POST(
@@ -60,7 +62,7 @@ export async function POST(
   const body = await req.json();
   const parsed = sendMessageSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Validation error" }, { status: 400 });
   }
 
   const message = await prisma.message.create({

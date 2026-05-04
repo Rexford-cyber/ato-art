@@ -13,7 +13,7 @@ export const shippingSchema = z.object({
 export const createOrderSchema = z.object({
   items: z.array(
     z.object({
-      artworkId: z.string().cuid(),
+      artworkId: z.string().min(1),
       quantity: z.number().int().positive().default(1),
     })
   ).min(1),

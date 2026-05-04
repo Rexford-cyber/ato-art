@@ -8,7 +8,7 @@ interface ArtworkCardProps {
     id: string;
     slug: string;
     title: string;
-    price: number | string;
+    price: number | string | { toString(): string };
     currency: string;
     status: string;
     images: { url: string; altText?: string | null }[];
