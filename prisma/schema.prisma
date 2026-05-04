@@ -1,0 +1,439 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────
+
+enum Role {
+  BUYER
+  ARTIST
+  ADMIN
+}
+
+enum ArtworkStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  SOLD
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum MediumType {
+  OIL
+  ACRYLIC
+  WATERCOLOR
+  DIGITAL
+  PENCIL
+  CHARCOAL
+  INK
+  MIXED_MEDIA
+  PHOTOGRAPHY
+  SCULPTURE
+  TEXTILE
+  OTHER
+}
+
+enum StyleType {
+  ABSTRACT
+  REALISM
+  PORTRAIT
+  LANDSCAPE
+  STILL_LIFE
+  SURREALISM
+  EXPRESSIONISM
+  CONTEMPORARY
+  TRADITIONAL
+  POP_ART
+  OTHER
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ─── MODELS ───────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  emailVerified  DateTime?
+  passwordHash   String?
+  name           String
+  username       String    @unique
+  avatarUrl      String?
+  avatarPublicId String?
+  role           Role      @default(BUYER)
+  bio            String?
+  phoneNumber    String?
+  country        String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  artistProfile ArtistProfile?
+  artworks      Artwork[]
+  orders        Order[]                  @relation("BuyerOrders")
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  sessions      Session[]
+  accounts      Account[]
+  sentMessages  Message[]                @relation("SentMessages")
+  conversations ConversationParticipant[]
+
+  @@map("users")
+}
+
+model ArtistProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName    String
+  tagline        String?
+  bannerUrl      String?
+  bannerPublicId String?
+  website        String?
+  instagramHandle String?
+  twitterHandle   String?
+
+  payoutEmail           String?
+  bankName              String?
+  bankAccountNumber     String?
+  bankAccountName       String?
+  bankCode              String?
+  paystackRecipientCode String?
+
+  totalSales    Int     @default(0)
+  totalRevenue  Decimal @default(0) @db.Decimal(12, 2)
+  totalEarnings Decimal @default(0) @db.Decimal(12, 2)
+
+  isVerified Boolean   @default(false)
+  verifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payouts Payout[]
+
+  @@map("artist_profiles")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  artworks    Artwork[]
+
+  @@map("categories")
+}
+
+model Artwork {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String
+  status      ArtworkStatus @default(DRAFT)
+
+  price    Decimal @db.Decimal(10, 2)
+  currency String  @default("GHS")
+
+  medium MediumType
+  style  StyleType
+  width  Float?
+  height Float?
+  depth  Float?
+  weight Float?
+  year   Int?
+
+  isOriginal   Boolean @default(true)
+  stockCount   Int     @default(1)
+  printSizes   Json?
+  isDigital    Boolean @default(false)
+  shippingFrom String?
+  shippingDays Int?
+
+  artistId   String
+  artist     User     @relation(fields: [artistId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  images        ArtworkImage[]
+  tags          ArtworkTag[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+
+  moderationNote String?
+  moderatedBy    String?
+  moderatedAt    DateTime?
+  submittedAt    DateTime?
+
+  viewCount     Int @default(0)
+  favoriteCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([artistId])
+  @@index([categoryId])
+  @@index([price])
+  @@index([createdAt])
+  @@map("artworks")
+}
+
+model ArtworkImage {
+  id        String  @id @default(cuid())
+  artworkId String
+  artwork   Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  url       String
+  publicId  String
+  width     Int
+  height    Int
+  format    String
+  bytes     Int
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+  altText   String?
+
+  createdAt DateTime @default(now())
+
+  @@map("artwork_images")
+}
+
+model ArtworkTag {
+  id        String  @id @default(cuid())
+  artworkId String
+  artwork   Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  tag       String
+
+  @@unique([artworkId, tag])
+  @@index([tag])
+  @@map("artwork_tags")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  buyerId     String
+  buyer       User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  status      OrderStatus @default(PENDING)
+
+  subtotal    Decimal @db.Decimal(10, 2)
+  shippingFee Decimal @default(0) @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+  currency    String  @default("GHS")
+
+  shippingName    String
+  shippingEmail   String
+  shippingPhone   String?
+  shippingAddress String
+  shippingCity    String
+  shippingCountry String
+
+  paymentProvider  String?
+  paymentReference String?   @unique
+  paymentChannel   String?
+  paidAt           DateTime?
+
+  trackingNumber String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+
+  buyerNote String?
+  adminNote String?
+
+  items   OrderItem[]
+  payouts Payout[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerId])
+  @@index([status])
+  @@index([paymentReference])
+  @@map("orders")
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  artworkId       String
+  artwork         Artwork @relation(fields: [artworkId], references: [id])
+  artworkTitle    String
+  artworkImageUrl String
+  artistId        String
+  artistName      String
+
+  quantity       Int     @default(1)
+  unitPrice      Decimal @db.Decimal(10, 2)
+  subtotal       Decimal @db.Decimal(10, 2)
+  platformFee    Decimal @db.Decimal(10, 2)
+  artistEarnings Decimal @db.Decimal(10, 2)
+
+  payoutId String?
+  payout   Payout? @relation(fields: [payoutId], references: [id])
+
+  @@map("order_items")
+}
+
+model Payout {
+  id              String        @id @default(cuid())
+  artistProfileId String
+  artistProfile   ArtistProfile @relation(fields: [artistProfileId], references: [id])
+  orderId         String?
+  order           Order?        @relation(fields: [orderId], references: [id])
+
+  amount   Decimal      @db.Decimal(10, 2)
+  currency String
+  status   PayoutStatus @default(PENDING)
+
+  paystackTransferCode String?
+  paystackTransferRef  String?
+  failureReason        String?
+
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("payouts")
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  artworkId String
+  artwork   Artwork @relation(fields: [artworkId], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  rating             Int
+  comment            String?
+  isVerifiedPurchase Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@unique([artworkId, userId])
+  @@map("reviews")
+}
+
+model WishlistItem {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  artworkId String
+  artwork   Artwork @relation(fields: [artworkId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artworkId])
+  @@map("wishlist_items")
+}
+
+// ─── MESSAGING ────────────────────────────────────────────
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+
+  joinedAt   DateTime  @default(now())
+  lastReadAt DateTime?
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  content   String  @db.VarChar(2000)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+// ─── NEXT-AUTH ────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
