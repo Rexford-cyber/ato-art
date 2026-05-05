@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export interface UploadedImage {
@@ -17,78 +17,64 @@ export interface UploadedImage {
 }
 
 interface ImageUploaderProps {
-  artistId: string;
+  // artistId is no longer needed but kept for backwards compatibility
+  // with the call site so we don't have to touch the upload page.
+  artistId?: string;
   value: UploadedImage[];
   onChange: (images: UploadedImage[]) => void;
   maxFiles?: number;
 }
 
+function isLikelyImageUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function formatFromUrl(url: string): string {
+  const match = url.match(/\.(jpe?g|png|webp|gif|avif|svg)(\?|$)/i);
+  return match ? match[1].toLowerCase().replace("jpeg", "jpg") : "url";
+}
+
 export default function ImageUploader({
-  artistId,
   value,
   onChange,
   maxFiles = 8,
 }: ImageUploaderProps) {
-  const [uploading, setUploading] = useState(false);
+  const [draft, setDraft] = useState("");
 
-  const upload = useCallback(
-    async (files: File[]) => {
-      if (value.length + files.length > maxFiles) {
-        toast.error(`Maximum ${maxFiles} images allowed`);
-        return;
-      }
+  function addUrl() {
+    const url = draft.trim();
+    if (!url) return;
+    if (!isLikelyImageUrl(url)) {
+      toast.error("Please paste a valid http(s) image URL");
+      return;
+    }
+    if (value.length >= maxFiles) {
+      toast.error(`Maximum ${maxFiles} images allowed`);
+      return;
+    }
+    if (value.some((img) => img.url === url)) {
+      toast.error("That image is already added");
+      return;
+    }
 
-      setUploading(true);
-      try {
-        const signRes = await fetch("/api/upload/sign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ folder: `artworks/${artistId}` }),
-        });
-        if (!signRes.ok) throw new Error("Failed to get upload signature");
-        const { signature, timestamp, cloudName, apiKey, folder, eager } = await signRes.json();
-
-        const uploaded: UploadedImage[] = [];
-        for (const file of files) {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("api_key", apiKey);
-          formData.append("signature", signature);
-          formData.append("timestamp", String(timestamp));
-          formData.append("folder", folder);
-          formData.append("eager", eager);
-
-          const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            { method: "POST", body: formData }
-          );
-          if (!res.ok) throw new Error("Upload failed");
-          const data = await res.json();
-          uploaded.push({
-            url: data.secure_url,
-            publicId: data.public_id,
-            width: data.width,
-            height: data.height,
-            format: data.format,
-            bytes: data.bytes,
-          });
-        }
-        onChange([...value, ...uploaded]);
-      } catch (err) {
-        toast.error("Upload failed. Please try again.");
-      } finally {
-        setUploading(false);
-      }
-    },
-    [value, onChange, artistId, maxFiles]
-  );
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: { "image/jpeg": [], "image/png": [], "image/webp": [] },
-    maxSize: 20 * 1024 * 1024,
-    onDrop: upload,
-    disabled: uploading || value.length >= maxFiles,
-  });
+    const next: UploadedImage = {
+      url,
+      // We don't have a CDN public id without an upload step, so we use
+      // the URL itself as a stable unique identifier.
+      publicId: url,
+      width: 0,
+      height: 0,
+      format: formatFromUrl(url),
+      bytes: 0,
+    };
+    onChange([...value, next]);
+    setDraft("");
+  }
 
   function remove(publicId: string) {
     onChange(value.filter((img) => img.publicId !== publicId));
@@ -96,35 +82,51 @@ export default function ImageUploader({
 
   return (
     <div className="space-y-3">
-      <div
-        {...getRootProps()}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
-          isDragActive
-            ? "border-primary bg-primary/5"
-            : "border-border hover:border-primary/50 hover:bg-muted/30"
-        } ${value.length >= maxFiles || uploading ? "opacity-50 cursor-not-allowed" : ""}`}
-      >
-        <input {...getInputProps()} />
-        {uploading ? (
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        ) : (
-          <Upload className="h-8 w-8 text-muted-foreground" />
-        )}
-        <p className="mt-2 text-sm text-muted-foreground">
-          {uploading
-            ? "Uploading…"
-            : isDragActive
-            ? "Drop images here"
-            : "Drag & drop or click to upload"}
-        </p>
-        <p className="text-xs text-muted-foreground">JPG, PNG, WebP up to 20MB</p>
+      <div className="flex gap-2">
+        <Input
+          type="url"
+          inputMode="url"
+          placeholder="Paste image URL — https://..."
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addUrl();
+            }
+          }}
+          disabled={value.length >= maxFiles}
+        />
+        <Button
+          type="button"
+          onClick={addUrl}
+          disabled={!draft.trim() || value.length >= maxFiles}
+          className="shrink-0"
+        >
+          <Plus className="h-4 w-4" />
+          Add
+        </Button>
       </div>
+      <p className="text-xs text-muted-foreground">
+        Host your image somewhere (Imgur, Postimage, your own site) and paste the direct link.
+        First image is used as the primary display.
+      </p>
 
-      {value.length > 0 && (
+      {value.length > 0 ? (
         <div className="grid grid-cols-4 gap-2">
           {value.map((img, i) => (
-            <div key={img.publicId} className="group relative aspect-square overflow-hidden rounded-md bg-muted">
-              <Image src={img.url} alt={`Upload ${i + 1}`} fill className="object-cover" sizes="120px" />
+            <div
+              key={img.publicId}
+              className="group relative aspect-square overflow-hidden rounded-md bg-muted"
+            >
+              <Image
+                src={img.url}
+                alt={`Image ${i + 1}`}
+                fill
+                className="object-cover"
+                sizes="120px"
+                unoptimized
+              />
               {i === 0 && (
                 <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 py-0.5 text-xs text-white">
                   Primary
@@ -134,11 +136,18 @@ export default function ImageUploader({
                 type="button"
                 onClick={() => remove(img.publicId)}
                 className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                aria-label="Remove image"
               >
                 <X className="h-3 w-3" />
               </button>
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center text-muted-foreground">
+          <ImageIcon className="h-8 w-8" />
+          <p className="mt-2 text-sm">No images yet</p>
+          <p className="text-xs">Add at least one image link to continue</p>
         </div>
       )}
     </div>

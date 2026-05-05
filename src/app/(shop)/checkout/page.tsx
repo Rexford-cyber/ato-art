@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartStore } from "@/store/cartStore";
@@ -48,25 +49,12 @@ export default function CheckoutPage() {
 
     if (!orderRes.ok) {
       setLoading(false);
-      toast.error(order.error ?? "Failed to create order");
-      return;
-    }
-
-    const payRes = await fetch("/api/payments/initialize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: order.id }),
-    });
-    const payData = await payRes.json();
-
-    if (!payRes.ok) {
-      setLoading(false);
-      toast.error(payData.error ?? "Payment initialization failed");
+      toast.error(order.error ?? "Failed to place order");
       return;
     }
 
     clearCart();
-    window.location.href = payData.authorizationUrl;
+    router.push(`/checkout/success?orderId=${order.id}`);
   }
 
   if (items.length === 0) {
@@ -82,7 +70,11 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
+      <h1 className="mb-2 text-3xl font-bold">Place your order</h1>
+      <p className="mb-8 text-sm text-muted-foreground">
+        Once you place your order, the artist will reach out to confirm payment and arrange delivery.
+      </p>
+
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {/* Shipping form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -118,11 +110,19 @@ export default function CheckoutPage() {
               {errors.shippingCountry && <p className="text-xs text-destructive">{errors.shippingCountry.message}</p>}
             </div>
           </div>
+          <div className="space-y-1">
+            <Label>Note for the artist <span className="text-muted-foreground">(optional)</span></Label>
+            <Textarea
+              rows={3}
+              {...register("buyerNote")}
+              placeholder="Anything the artist should know about your order"
+            />
+          </div>
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Redirecting to Paystack…" : `Pay ${formatCurrency(totalPrice(), currency)}`}
+            {loading ? "Placing order…" : `Place order · ${formatCurrency(totalPrice(), currency)}`}
           </Button>
           <p className="text-xs text-center text-muted-foreground">
-            Secure payment powered by Paystack — cards, mobile money, bank transfer
+            No payment is taken now. The artist will contact you to confirm payment and delivery details.
           </p>
         </form>
 

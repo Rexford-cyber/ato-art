@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, artistProfileSchema } from "@/lib/validations/user";
-import { z } from "zod";
 
 const artistRegisterSchema = registerSchema.merge(
   artistProfileSchema.pick({ displayName: true, tagline: true })

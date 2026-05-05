@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { registerSchema, type RegisterInput } from "@/lib/validations/user";
 
 export default function RegisterPage() {
@@ -55,16 +54,6 @@ export default function RegisterPage() {
         <CardDescription>Buy original African artwork</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button variant="outline" className="w-full" onClick={() => signIn("google")}>
-          Continue with Google
-        </Button>
-
-        <div className="flex items-center gap-2">
-          <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground">or</span>
-          <Separator className="flex-1" />
-        </div>
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor="name">Full name</Label>
