@@ -110,6 +110,7 @@ model ArtistProfile {
   bannerUrl      String?
   bannerPublicId String?
   website        String?
+  phone           String?
   instagramHandle String?
   twitterHandle   String?
 
@@ -435,4 +436,17 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// Image bytes stored directly in Postgres so we don't need any external
+// storage service. ArtworkImage rows that come from a file upload set their
+// `publicId` to the ImageBlob.id and their `url` to "/api/images/<id>".
+model ImageBlob {
+  id        String   @id @default(cuid())
+  data      Bytes
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@map("image_blobs")
 }

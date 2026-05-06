@@ -20,6 +20,11 @@ export const artistProfileSchema = z.object({
   displayName: z.string().min(2).max(100),
   tagline: z.string().max(200).optional(),
   bio: z.string().max(1000).optional(),
+  phone: z
+    .string()
+    .min(7, "Phone number is too short")
+    .max(20, "Phone number is too long")
+    .regex(/^[+0-9 ()\-]+$/, "Use digits, spaces, +, -, ( and ) only"),
   website: z.string().url().optional().or(z.literal("")),
   instagramHandle: z.string().max(50).optional(),
   twitterHandle: z.string().max(50).optional(),

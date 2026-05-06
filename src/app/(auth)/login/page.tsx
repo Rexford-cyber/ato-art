@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginSchema, type LoginInput } from "@/lib/validations/user";
 
 export default function LoginPage() {
@@ -43,35 +42,43 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your Ato&apos;s Art account</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-            {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" {...register("password")} />
-            {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
-          </Button>
-        </form>
+    <div>
+      <p className="font-mono text-[11.5px] uppercase tracking-[0.14em] text-ink-soft">Sign in</p>
+      <h1 className="font-display mt-3 text-[34px] font-semibold leading-[1.08] tracking-[-0.018em] text-ink">
+        Welcome back.
+      </h1>
+      <p className="mt-3 text-[14.5px] text-ink-muted">
+        Enter your email and password to continue.
+      </p>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-foreground underline underline-offset-4">
-            Sign up
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-9 space-y-5">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-[12.5px] text-ink-muted">Email</Label>
+          <Input id="email" type="email" placeholder="you@example.com" autoComplete="email" className="h-11" {...register("email")} />
+          {errors.email && <p className="text-[12px] text-destructive">{errors.email.message}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-[12.5px] text-ink-muted">Password</Label>
+          <Input id="password" type="password" autoComplete="current-password" className="h-11" {...register("password")} />
+          {errors.password && <p className="text-[12px] text-destructive">{errors.password.message}</p>}
+        </div>
+
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
+        </Button>
+      </form>
+
+      <p className="mt-10 text-[13.5px] text-ink-muted">
+        New here?{" "}
+        <Link href="/register" className="text-ink underline decoration-1 underline-offset-[3px] decoration-ink-soft transition-colors hover:decoration-accent">
+          Create an account
+        </Link>
+        , or{" "}
+        <Link href="/register/artist" className="text-ink underline decoration-1 underline-offset-[3px] decoration-ink-soft transition-colors hover:decoration-accent">
+          apply to sell
+        </Link>
+        .
+      </p>
+    </div>
   );
 }

@@ -3,104 +3,202 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import ArtworkCard from "@/components/artworks/ArtworkCard";
 import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ato's Art — African Art Marketplace",
-  description: "Discover and buy original African artwork. Support artists across the continent.",
+  title: "Ato's Art, Original African artwork by named artists",
+  description:
+    "Original paintings, photography, sculpture and more, sold directly by artists from across the continent.",
 };
 
 export default async function HomePage() {
-  const [featured, categories, artistCount, artworkCount] = await Promise.all([
+  const [featured, categories] = await Promise.all([
     prisma.artwork.findMany({
       where: { status: "APPROVED" },
       orderBy: { createdAt: "desc" },
-      take: 8,
+      take: 7,
       include: {
         images: { where: { isPrimary: true }, take: 1 },
-        artist: { select: { name: true, username: true } },
+        artist: {
+          select: {
+            name: true,
+            username: true,
+            artistProfile: { select: { displayName: true } },
+          },
+        },
         category: { select: { name: true, slug: true } },
       },
     }),
-    prisma.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" }, take: 6 }),
-    prisma.user.count({ where: { role: "ARTIST" } }),
-    prisma.artwork.count({ where: { status: "APPROVED" } }),
+    prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      take: 6,
+    }),
   ]);
+
+  const lead = featured[0];
+  const rest = featured.slice(1, 7);
 
   return (
     <div className="flex flex-col">
-      {/* Hero */}
-      <section className="relative bg-gradient-to-br from-stone-900 to-stone-700 text-white py-24 px-4 sm:px-6 lg:px-8 text-center">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            African Art, Brought to You
-          </h1>
-          <p className="mt-4 text-lg text-stone-300 max-w-xl mx-auto">
-            Discover original paintings, sculptures, photography and more — directly from artists
-            across the continent.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" asChild className="bg-white text-stone-900 hover:bg-stone-100">
-              <Link href="/artworks">Browse Art</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white/10">
-              <Link href="/register/artist">Sell Your Art</Link>
-            </Button>
+      <section className="border-b border-border">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 pt-14 pb-20 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:px-8 lg:pt-24 lg:pb-28">
+          <div className="lg:col-span-6 lg:pt-6 xl:col-span-6">
+            <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">
+              Volume {String(new Date().getFullYear()).slice(-2)}, ongoing
+            </p>
+            <h1 className="font-display mt-5 text-[clamp(2.6rem,5.6vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-ink">
+              Original African art,{" "}
+              <em className="text-accent">brought to you</em> by the people who made it.
+            </h1>
+            <p className="mt-7 max-w-[52ch] text-[16.5px] leading-relaxed text-ink-muted">
+              Painting, photography, sculpture, textile and print, sold directly by
+              named artists across Ghana, Nigeria, Kenya, South Africa and beyond. No
+              gallery markup, no anonymous catalog: every piece is signed, every
+              maker is reachable.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Button size="lg" asChild>
+                <Link href="/artworks">View the works</Link>
+              </Button>
+              <Button size="lg" variant="ghost" asChild>
+                <Link href="/register/artist" className="gap-1">
+                  Sell your work
+                  <ArrowUpRight className="h-4 w-4" strokeWidth={1.6} />
+                </Link>
+              </Button>
+            </div>
           </div>
-          <div className="mt-10 flex justify-center gap-10 text-sm text-stone-400">
-            <div><span className="block text-2xl font-bold text-white">{artworkCount}+</span>Artworks</div>
-            <div><span className="block text-2xl font-bold text-white">{artistCount}+</span>Artists</div>
-            <div><span className="block text-2xl font-bold text-white">15+</span>Countries</div>
-          </div>
+
+          {lead && lead.images[0] && (
+            <Link href={`/artworks/${lead.slug}`} className="group lg:col-span-6 xl:col-span-6">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted lg:aspect-[5/6]">
+                <Image
+                  src={lead.images[0].url}
+                  alt={lead.title}
+                  fill
+                  priority
+                  unoptimized={lead.images[0].url.startsWith("http")}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-[700ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.025]"
+                />
+              </div>
+              <div className="mt-4 flex items-baseline justify-between gap-4">
+                <div>
+                  <p className="font-display text-[17px] font-medium text-ink">
+                    {lead.title}
+                  </p>
+                  <p className="mt-0.5 text-[13px] text-ink-muted">
+                    {lead.artist.artistProfile?.displayName ?? lead.artist.name}
+                    <span className="text-ink-soft"> &middot; {lead.category.name}</span>
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1 font-mono text-[12px] uppercase tracking-[0.12em] text-ink-soft transition-colors group-hover:text-ink">
+                  Lead piece
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+                </span>
+              </div>
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* Categories */}
-      {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 w-full">
-          <h2 className="mb-6 text-2xl font-bold">Browse by Category</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/artworks?category=${cat.slug}`}
-                className="flex items-center justify-center rounded-xl border bg-muted/40 px-4 py-6 text-sm font-medium hover:bg-accent transition-colors text-center"
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Featured artworks */}
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 w-full">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Latest Works</h2>
-            <Link href="/artworks" className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4">
-              View all
+      {rest.length > 0 && (
+        <section className="mx-auto w-full max-w-7xl px-4 pt-20 pb-14 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="font-display text-[28px] font-semibold tracking-tight text-ink">
+              Latest in the gallery
+            </h2>
+            <Link
+              href="/artworks"
+              className="group inline-flex items-center gap-1 text-[13px] text-ink-muted transition-colors hover:text-ink"
+            >
+              All works
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={1.6} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featured.map((artwork) => (
-              <ArtworkCard key={artwork.id} artwork={artwork} />
+
+          <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
+            {rest.slice(0, 6).map((artwork, i) => (
+              <div key={artwork.id} className={i === 0 || i === 5 ? "lg:row-span-2" : ""}>
+                <ArtworkCard
+                  artwork={artwork}
+                  aspect={i === 0 || i === 5 ? "portrait" : "square"}
+                />
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* CTA for artists */}
-      <section className="bg-muted/50 py-16 px-4 text-center">
-        <div className="mx-auto max-w-xl">
-          <h2 className="text-2xl font-bold">Are you an artist?</h2>
-          <p className="mt-2 text-muted-foreground">
-            Join hundreds of African artists selling their work on our platform. We handle payments,
-            you focus on your art.
-          </p>
-          <Button asChild className="mt-6">
-            <Link href="/register/artist">Start Selling Today</Link>
-          </Button>
+      {categories.length > 0 && (
+        <section className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 pt-20 pb-24 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-4">
+                <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">
+                  Index
+                </p>
+                <h2 className="font-display mt-4 text-[36px] font-semibold leading-[1.05] tracking-[-0.02em] text-ink">
+                  By <em>medium</em>
+                </h2>
+                <p className="mt-5 max-w-[36ch] text-[14.5px] leading-relaxed text-ink-muted">
+                  Pick a discipline. Each leads to its own room.
+                </p>
+              </div>
+
+              <ul className="lg:col-span-8">
+                {categories.map((cat, i) => (
+                  <li key={cat.slug} className="border-b border-border last:border-b-0">
+                    <Link
+                      href={`/artworks?category=${cat.slug}`}
+                      className="group flex items-baseline justify-between gap-4 py-5 transition-colors hover:bg-muted/40"
+                    >
+                      <span className="flex items-baseline gap-5 sm:gap-7">
+                        <span className="font-mono text-[12px] tabular-nums text-ink-soft">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="font-display text-[clamp(1.5rem,3vw,2rem)] font-medium tracking-tight text-ink transition-colors group-hover:text-accent">
+                          {cat.name}
+                        </span>
+                      </span>
+                      <ArrowUpRight
+                        className="h-5 w-5 shrink-0 text-ink-soft transition-transform duration-[240ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
+                        strokeWidth={1.6}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="border-t border-border bg-accent-soft">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-20 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:py-24 lg:px-8">
+          <div className="lg:col-span-7">
+            <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-accent">
+              For artists
+            </p>
+            <h2 className="font-display mt-4 text-[clamp(1.9rem,3.6vw,2.6rem)] font-semibold leading-[1.06] tracking-[-0.018em] text-ink">
+              Sell your work without losing the relationship.
+            </h2>
+            <p className="mt-5 max-w-[58ch] text-[15.5px] leading-relaxed text-ink-muted">
+              You upload, you set the price, you keep the conversation with the
+              buyer. We handle the storefront, the order ledger, and the trust
+              signals. Apply to join, get reviewed within five working days.
+            </p>
+          </div>
+          <div className="flex items-end lg:col-span-5 lg:justify-end">
+            <Button size="xl" asChild>
+              <Link href="/register/artist" className="gap-1.5">
+                Apply to sell
+                <ArrowUpRight className="h-4 w-4" strokeWidth={1.6} />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>

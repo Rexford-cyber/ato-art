@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema, artistProfileSchema } from "@/lib/validations/user";
 
 const artistRegisterSchema = registerSchema.merge(
-  artistProfileSchema.pick({ displayName: true, tagline: true })
+  artistProfileSchema.pick({ displayName: true, tagline: true, phone: true })
 );
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Validation error" }, { status: 400 });
   }
 
-  const { name, email, password, username, displayName, tagline } = parsed.data;
+  const { name, email, password, username, displayName, tagline, phone } = parsed.data;
 
   const existing = await prisma.user.findFirst({
     where: { OR: [{ email }, { username }] },
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       passwordHash,
       role: "ARTIST",
       artistProfile: {
-        create: { displayName, tagline },
+        create: { displayName, tagline, phone },
       },
     },
   });

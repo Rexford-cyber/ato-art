@@ -2,44 +2,64 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t bg-muted/40 py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          <div>
-            <p className="text-lg font-bold">Ato&apos;s Art</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Africa&apos;s marketplace for original artwork.
+    <footer className="mt-auto border-t border-border bg-background">
+      <div className="mx-auto max-w-7xl px-4 pt-16 pb-10 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-12">
+          <div className="col-span-2 md:col-span-5">
+            <p className="font-display text-[22px] font-semibold tracking-tight text-ink">
+              Ato&rsquo;s Art
+            </p>
+            <p className="mt-3 max-w-[36ch] text-[14px] leading-relaxed text-ink-muted">
+              Original work, made by named African artists, sold directly. We do not
+              take ownership of the pieces; we set the table.
             </p>
           </div>
-          <div>
-            <p className="text-sm font-semibold">Discover</p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/artworks" className="hover:text-foreground">Browse Art</Link></li>
-              <li><Link href="/artists" className="hover:text-foreground">Artists</Link></li>
-              <li><Link href="/artworks?style=ABSTRACT" className="hover:text-foreground">Abstract</Link></li>
-              <li><Link href="/artworks?style=PORTRAIT" className="hover:text-foreground">Portraits</Link></li>
+
+          <div className="hidden md:col-span-1 md:block" />
+
+          <div className="col-span-1 md:col-span-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-soft">Browse</p>
+            <ul className="mt-4 space-y-2.5 text-[14px]">
+              <FooterLink href="/artworks">All works</FooterLink>
+              <FooterLink href="/artists">Artists</FooterLink>
+              <FooterLink href="/artworks?style=ABSTRACT">Abstract</FooterLink>
+              <FooterLink href="/artworks?style=PORTRAIT">Portrait</FooterLink>
             </ul>
           </div>
-          <div>
-            <p className="text-sm font-semibold">Sell</p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/register/artist" className="hover:text-foreground">Become an Artist</Link></li>
-              <li><Link href="/artist/dashboard" className="hover:text-foreground">Artist Dashboard</Link></li>
+
+          <div className="col-span-1 md:col-span-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-soft">Artists</p>
+            <ul className="mt-4 space-y-2.5 text-[14px]">
+              <FooterLink href="/register/artist">Apply to sell</FooterLink>
+              <FooterLink href="/artist/dashboard">Artist dashboard</FooterLink>
             </ul>
           </div>
-          <div>
-            <p className="text-sm font-semibold">Company</p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/about" className="hover:text-foreground">About</Link></li>
-              <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
+
+          <div className="col-span-2 md:col-span-2">
+            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-soft">House</p>
+            <ul className="mt-4 space-y-2.5 text-[14px]">
+              <FooterLink href="/about">About</FooterLink>
+              <FooterLink href="/privacy">Privacy</FooterLink>
+              <FooterLink href="/terms">Terms</FooterLink>
             </ul>
           </div>
         </div>
-        <div className="mt-8 border-t pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Ato&apos;s Art. All rights reserved.
+
+        <div className="mt-16 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 text-[12px] text-ink-soft sm:flex-row sm:items-center">
+          <p>&copy; {new Date().getFullYear()} Ato&rsquo;s Art. Accra and elsewhere.</p>
+          <p className="font-mono text-[11px] tracking-wide">made on the continent</p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <li>
+      <Link href={href} className="text-ink-muted transition-colors duration-[180ms] hover:text-ink">
+        {children}
+      </Link>
+    </li>
   );
 }
