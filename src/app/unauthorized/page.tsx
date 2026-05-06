@@ -16,18 +16,12 @@ export default function UnauthorizedPage() {
           Access denied.
         </h1>
         <p className="mt-3 max-w-[40ch] text-[14.5px] text-ink-muted">
-          You don&rsquo;t have permission to view this page. Sign in with an account
-          that has the required role.
+          You don&apos;t have permission to view this page.
         </p>
       </div>
-      <div className="flex gap-2">
-        <Button variant="ghost" asChild>
-          <Link href="/">Go home</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/login">Sign in</Link>
-        </Button>
-      </div>
+      <Button asChild>
+        <Link href="/">Go home</Link>
+      </Button>
     </div>
   );
 }

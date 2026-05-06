@@ -31,23 +31,13 @@ export default async function AdminDashboardPage() {
         </h1>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <AdminStat
-          label="Pending review"
-          value={String(pendingCount)}
-          urgent={pendingCount > 0}
-        />
+        <AdminStat label="Pending review" value={String(pendingCount)} urgent={pendingCount > 0} />
         <AdminStat label="Artists" value={String(artistCount)} />
         <AdminStat label="Orders" value={String(totalOrders)} />
-        <AdminStat
-          label="Platform GMV"
-          value={formatCurrency(gmv, "GHS")}
-          mono
-        />
+        <AdminStat label="Platform GMV" value={formatCurrency(gmv, "GHS")} mono />
       </div>
 
-      {/* Pending alert */}
       {pendingCount > 0 && (
         <div className="flex items-center justify-between gap-6 rounded-md border border-ochre/50 bg-ochre/8 px-5 py-4">
           <div>
@@ -67,7 +57,6 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Quick links */}
       <div>
         <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
           Quick actions
@@ -82,24 +71,14 @@ export default async function AdminDashboardPage() {
 }
 
 function AdminStat({
-  label,
-  value,
-  urgent = false,
-  mono = false,
+  label, value, urgent = false, mono = false,
 }: {
-  label: string;
-  value: string;
-  urgent?: boolean;
-  mono?: boolean;
+  label: string; value: string; urgent?: boolean; mono?: boolean;
 }) {
   return (
     <div className={`rounded-md border p-5 ${urgent ? "border-ochre/50 bg-ochre/8" : "border-border bg-surface"}`}>
-      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-[24px] font-semibold leading-none ${mono ? "font-mono tabular-nums text-ink" : "font-display text-ink"} ${urgent ? "text-ochre" : ""}`}
-      >
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">{label}</p>
+      <p className={`mt-3 text-[24px] font-semibold leading-none ${mono ? "font-mono tabular-nums" : "font-display"} ${urgent ? "text-ochre" : "text-ink"}`}>
         {value}
       </p>
     </div>
@@ -110,13 +89,10 @@ function QuickLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between rounded-md border border-border bg-surface px-4 py-3.5 transition-colors duration-[180ms] hover:border-ink-soft/40 hover:bg-muted/40"
+      className="group flex items-center justify-between rounded-md border border-border bg-surface px-4 py-3.5 transition-colors duration-[180ms] hover:border-ink-soft/40 hover:bg-muted/30"
     >
-      <span className="text-[13.5px] text-ink">{label}</span>
-      <ArrowUpRight
-        className="h-4 w-4 text-ink-soft transition-transform duration-[240ms] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
-        strokeWidth={1.6}
-      />
+      <span className="text-[13.5px] text-ink-muted transition-colors group-hover:text-ink">{label}</span>
+      <ArrowUpRight className="h-3.5 w-3.5 text-ink-soft transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink" strokeWidth={1.6} />
     </Link>
   );
 }

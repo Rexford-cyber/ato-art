@@ -1,6 +1,9 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+const { auth } = NextAuth(authConfig);
 
 const ARTIST_ROUTES = /^\/artist(\/|$)/;
 const ADMIN_ROUTES = /^\/admin(\/|$)/;

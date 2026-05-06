@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Image, ShoppingBag, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Image, Users, ShoppingBag } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
@@ -12,18 +12,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/artist/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/artist/artworks", label: "Artworks", icon: Image },
-  { href: "/artist/orders", label: "Sales", icon: ShoppingBag },
-  { href: "/artist/messages", label: "Messages", icon: MessageSquare },
+  { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/artworks", label: "Queue", icon: Image },
+  { href: "/admin/artists", label: "Artists", icon: Users },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
 ];
 
-export default function MobileBottomNav() {
+export default function AdminMobileNav() {
   const pathname = usePathname();
+  const items = navItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 md:hidden">
-      {navItems.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
           <Link

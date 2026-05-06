@@ -43,16 +43,15 @@ export default async function ConversationPage({ params }: PageProps) {
 
   return (
     <div className="flex h-[calc(100vh-6rem)] max-w-2xl flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 border-b pb-4 mb-4">
+      <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
         <div className="relative h-10 w-10 overflow-hidden rounded-full bg-muted">
           {otherUser?.avatarUrl && (
-            <Image src={otherUser.avatarUrl} alt={otherUser.name} fill className="object-cover" sizes="40px" />
+            <Image src={otherUser.avatarUrl} alt={otherUser.name ?? ""} fill className="object-cover" sizes="40px" unoptimized />
           )}
         </div>
         <div>
-          <p className="font-semibold">{otherUser?.name ?? "Unknown"}</p>
-          <p className="text-xs text-muted-foreground">@{otherUser?.username}</p>
+          <p className="font-medium text-ink">{otherUser?.name ?? "Unknown"}</p>
+          <p className="text-[12px] text-ink-soft">@{otherUser?.username}</p>
         </div>
       </div>
 

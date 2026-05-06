@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
@@ -11,7 +11,7 @@ interface OrderSummary {
   orderNumber: string;
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const [order, setOrder] = useState<OrderSummary | null>(null);
@@ -39,7 +39,7 @@ export default function CheckoutSuccessPage() {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-5">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-ink" />
         <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink-soft">
-          Saving your order…
+          Saving your order&hellip;
         </p>
       </div>
     );
@@ -47,7 +47,6 @@ export default function CheckoutSuccessPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-24 sm:px-6">
-      {/* Success icon */}
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-moss/15">
         <Check className="h-7 w-7 text-moss" strokeWidth={2} />
       </div>
@@ -66,21 +65,34 @@ export default function CheckoutSuccessPage() {
       )}
 
       <p className="mt-6 text-[14.5px] leading-relaxed text-ink-muted">
-        Thank you for supporting African art directly. The artist will be in
-        touch shortly to confirm payment and arrange delivery.
+        The artist will be in touch to confirm payment and arrange delivery. Check your
+        email for a confirmation.
       </p>
 
       <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-        <Button asChild className="gap-1.5">
-          <Link href="/buyer/orders">
-            View my orders
+        {order && (
+          <Button asChild variant="outline" className="gap-1">
+            <Link href={`/buyer/orders/${order.id}`}>
+              View order
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+            </Link>
+          </Button>
+        )}
+        <Button asChild className="gap-1">
+          <Link href="/artworks">
+            Keep browsing
             <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
           </Link>
         </Button>
-        <Button variant="ghost" asChild>
-          <Link href="/artworks">Continue browsing</Link>
-        </Button>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

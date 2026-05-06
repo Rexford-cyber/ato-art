@@ -108,17 +108,20 @@ export default async function AdminArtworksPage({ searchParams }: PageProps) {
                               fill
                               unoptimized={artwork.images[0].url.startsWith("http")}
                               className="object-cover"
-                              sizes="44px"
                             />
                           )}
                         </div>
-                        <span className="max-w-[140px] truncate font-medium text-ink">
-                          {artwork.title}
-                        </span>
+                        <div>
+                          <p className="font-medium text-ink leading-snug">{artwork.title}</p>
+                          {artwork.category && (
+                            <p className="text-[12px] text-ink-soft">{artwork.category.name}</p>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="hidden px-4 py-3.5 text-ink-muted md:table-cell">
-                      {artwork.artist.name}
+                    <td className="hidden px-4 py-3.5 md:table-cell">
+                      <p className="text-ink">{artwork.artist.name}</p>
+                      <p className="text-[12px] text-ink-soft">{artwork.artist.email}</p>
                     </td>
                     <td className="px-4 py-3.5 font-mono tabular-nums text-ink">
                       {formatCurrency(artwork.price, artwork.currency)}
@@ -127,10 +130,9 @@ export default async function AdminArtworksPage({ searchParams }: PageProps) {
                       <ArtworkStatusBadge status={artwork.status} />
                     </td>
                     <td className="px-4 py-3.5 text-right">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/artworks/${artwork.id}/review`} className="gap-1">
-                          Review
-                          <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/admin/artworks/${artwork.id}`} className="flex items-center gap-1">
+                          Review <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
                         </Link>
                       </Button>
                     </td>
@@ -140,44 +142,39 @@ export default async function AdminArtworksPage({ searchParams }: PageProps) {
             </table>
           </div>
 
-          {/* Mobile card list */}
-          <ul className="space-y-3 sm:hidden">
+          {/* Mobile cards */}
+          <div className="flex flex-col gap-3 sm:hidden">
             {artworks.map((artwork) => (
-              <li key={artwork.id}>
-                <Link
-                  href={`/admin/artworks/${artwork.id}/review`}
-                  className="group flex items-center gap-4 rounded-md border border-border bg-surface p-4 transition-colors hover:border-ink-soft/40 hover:bg-muted/30"
-                >
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
-                    {artwork.images[0] && (
-                      <Image
-                        src={artwork.images[0].url}
-                        alt={artwork.title}
-                        fill
-                        unoptimized={artwork.images[0].url.startsWith("http")}
-                        className="object-cover"
-                        sizes="56px"
-                      />
-                    )}
+              <Link
+                key={artwork.id}
+                href={`/admin/artworks/${artwork.id}`}
+                className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 transition-colors hover:bg-muted/40"
+              >
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
+                  {artwork.images[0] && (
+                    <Image
+                      src={artwork.images[0].url}
+                      alt={artwork.title}
+                      fill
+                      unoptimized={artwork.images[0].url.startsWith("http")}
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate font-medium text-ink">{artwork.title}</p>
+                  <p className="text-[12px] text-ink-soft">{artwork.artist.name}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <ArtworkStatusBadge status={artwork.status} />
+                    <span className="font-mono text-[11.5px] tabular-nums text-ink-muted">
+                      {formatCurrency(artwork.price, artwork.currency)}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-ink">{artwork.title}</p>
-                    <p className="mt-0.5 text-[12px] text-ink-muted">{artwork.artist.name}</p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <ArtworkStatusBadge status={artwork.status} />
-                      <span className="font-mono text-[11.5px] tabular-nums text-ink-soft">
-                        {formatCurrency(artwork.price, artwork.currency)}
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowUpRight
-                    className="h-4 w-4 shrink-0 text-ink-soft transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
-                    strokeWidth={1.6}
-                  />
-                </Link>
-              </li>
+                </div>
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-ink-soft" strokeWidth={1.6} />
+              </Link>
             ))}
-          </ul>
+          </div>
         </>
       )}
     </div>

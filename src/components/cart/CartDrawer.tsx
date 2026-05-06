@@ -20,17 +20,12 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="right" className="flex w-full flex-col bg-background p-0 sm:max-w-[400px]">
-        {/* Header */}
         <SheetHeader className="border-b border-border px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
-                Cart
-              </p>
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">Cart</p>
               <SheetTitle className="font-display mt-1 text-[19px] font-semibold tracking-tight text-ink">
-                {items.length === 0
-                  ? "Empty"
-                  : `${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
+                {items.length === 0 ? "Empty" : `${items.length} ${items.length === 1 ? "piece" : "pieces"}`}
               </SheetTitle>
             </div>
           </div>
@@ -42,12 +37,8 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               <ShoppingBag className="h-7 w-7 text-ink-soft" strokeWidth={1.4} />
             </div>
             <div>
-              <p className="font-display text-[18px] font-semibold text-ink">
-                Nothing here yet.
-              </p>
-              <p className="mt-1.5 text-[13.5px] text-ink-muted">
-                Add pieces from the gallery.
-              </p>
+              <p className="font-display text-[18px] font-semibold text-ink">Nothing here yet.</p>
+              <p className="mt-1.5 text-[13.5px] text-ink-muted">Add pieces from the gallery.</p>
             </div>
             <Button asChild onClick={onClose} className="mt-1">
               <Link href="/artworks" className="gap-1.5">
@@ -58,7 +49,6 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
           </div>
         ) : (
           <>
-            {/* Items */}
             <div className="flex-1 overflow-y-auto px-6 py-2">
               <ul className="divide-y divide-border">
                 {items.map((item) => (
@@ -86,49 +76,39 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                         >
                           {item.title}
                         </Link>
-                        <p className="mt-0.5 text-[12px] text-ink-muted">{item.artistName}</p>
+                        <p className="mt-0.5 text-[12.5px] text-ink-soft">{item.artistName}</p>
                       </div>
-                      <p className="font-mono text-[13px] tabular-nums text-ink">
-                        {formatCurrency(item.price, item.currency)}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[13px] tabular-nums text-ink">
+                          {formatCurrency(item.price, item.currency)}
+                        </span>
+                        <button
+                          onClick={() => removeItem(item.artworkId)}
+                          className="flex h-7 w-7 items-center justify-center rounded text-ink-soft transition-colors hover:bg-muted hover:text-brick"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.6} />
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.artworkId)}
-                      aria-label={`Remove ${item.title}`}
-                      className="mt-0.5 h-7 w-7 shrink-0 rounded text-ink-soft transition-colors duration-[180ms] hover:text-brick"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.6} />
-                    </button>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-border px-6 py-5">
-              <div className="flex items-baseline justify-between gap-4">
-                <span className="text-[13px] text-ink-muted">Total</span>
-                <span className="font-mono text-[18px] tabular-nums text-ink">
+            <div className="border-t border-border px-6 py-5 space-y-4">
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-soft">Total</span>
+                <span className="font-mono text-[18px] font-semibold tabular-nums text-ink">
                   {formatCurrency(totalPrice(), currency)}
                 </span>
               </div>
-              <p className="mt-1 text-[11.5px] text-ink-soft">
-                Shipping arranged directly with the artist after order.
-              </p>
-              <Button className="mt-4 w-full gap-1.5" asChild onClick={onClose}>
+              <Button asChild className="w-full gap-1.5" onClick={onClose}>
                 <Link href="/checkout">
                   Proceed to checkout
                   <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
                 </Link>
               </Button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-2.5 w-full text-center text-[13px] text-ink-muted transition-colors hover:text-ink"
-              >
-                Continue browsing
-              </button>
             </div>
           </>
         )}

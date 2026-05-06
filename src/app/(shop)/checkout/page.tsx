@@ -16,6 +16,26 @@ import { formatCurrency } from "@/lib/utils/currency";
 import { shippingSchema, type ShippingInput } from "@/lib/validations/order";
 import { ArrowUpRight, ShoppingBag } from "lucide-react";
 
+interface Field {
+  label: string;
+  sublabel?: string;
+  error: string | undefined;
+  children: React.ReactNode;
+}
+
+function Field({ label, sublabel, error, children }: Field) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="flex items-baseline gap-2">
+        {label}
+        {sublabel && <span className="font-normal text-ink-soft text-[11.5px]">{sublabel}</span>}
+      </Label>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -49,111 +69,98 @@ export default function CheckoutPage() {
         ...shipping,
       }),
     });
-    const order = await orderRes.json();
+
+    const orderJson = await orderRes.json();
+    setLoading(false);
 
     if (!orderRes.ok) {
-      setLoading(false);
-      toast.error(order.error ?? "Failed to place order");
+      toast.error(orderJson.error ?? "Failed to place order");
       return;
     }
 
     clearCart();
-    router.push(`/checkout/success?orderId=${order.id}`);
+    router.push(`/checkout/success?orderId=${orderJson.id}`);
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <ShoppingBag className="h-7 w-7 text-ink-soft" strokeWidth={1.4} />
-        </div>
-        <p className="font-display mt-5 text-[1.6rem] font-semibold tracking-tight text-ink">
-          Your cart is empty.
-        </p>
-        <p className="mt-2 text-[14px] text-ink-muted">
-          Add a piece before checking out.
-        </p>
-        <Button asChild className="mt-6 gap-1.5">
-          <Link href="/artworks">
-            Browse the collection
-            <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
-          </Link>
-        </Button>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <ShoppingBag className="h-10 w-10 text-ink-soft" strokeWidth={1.4} />
+        <p className="font-display text-[18px] font-semibold text-ink">Your cart is empty</p>
+        <Link href="/artworks" className="flex items-center gap-1 text-[13.5px] text-ink underline underline-offset-2">
+          Browse artworks <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      {/* Header */}
-      <div className="mb-10 border-b border-border pb-8">
-        <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">
-          Checkout
-        </p>
-        <h1 className="font-display mt-3 text-[clamp(1.9rem,3.4vw,2.6rem)] font-semibold leading-[1.06] tracking-[-0.018em] text-ink">
-          Place your order
-        </h1>
-        <p className="mt-3 max-w-[56ch] text-[14.5px] text-ink-muted">
-          No payment is taken now. Once you submit, the artist will contact you to
-          confirm payment and arrange delivery directly.
-        </p>
-      </div>
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">Checkout</p>
+      <h1 className="font-display mt-2 mb-10 text-[clamp(1.7rem,3vw,2.2rem)] font-semibold leading-[1.06] tracking-[-0.018em] text-ink">
+        Complete your order
+      </h1>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
         {/* Shipping form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
             Shipping details
           </p>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Full name" error={errors.shippingName?.message}>
               <Input
                 {...register("shippingName")}
-                placeholder="Abena Mensah"
-                className="h-11 bg-surface"
+                placeholder="Ama Owusu"
+                className="bg-surface"
               />
             </Field>
             <Field label="Email" error={errors.shippingEmail?.message}>
               <Input
                 type="email"
                 {...register("shippingEmail")}
-                placeholder="you@example.com"
-                className="h-11 bg-surface"
+                placeholder="ama@example.com"
+                className="bg-surface"
               />
             </Field>
           </div>
 
-          <Field label="Phone" error={undefined}>
+          <Field label="Phone" sublabel="Optional" error={errors.shippingPhone?.message}>
             <Input
-              type="tel"
               {...register("shippingPhone")}
-              placeholder="+233 xx xxx xxxx"
-              className="h-11 bg-surface"
+              placeholder="+233 XX XXX XXXX"
+              className="bg-surface"
             />
           </Field>
 
-          <Field label="Street address" error={errors.shippingAddress?.message}>
+          <Field label="Address line 1" error={errors.shippingAddress1?.message}>
             <Input
-              {...register("shippingAddress")}
-              placeholder="14 Independence Ave"
-              className="h-11 bg-surface"
+              {...register("shippingAddress1")}
+              placeholder="123 Oxford Street"
+              className="bg-surface"
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-5">
+          <Field label="Address line 2" sublabel="Optional" error={errors.shippingAddress2?.message}>
+            <Input
+              {...register("shippingAddress2")}
+              placeholder="Apt, suite, etc."
+              className="bg-surface"
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
             <Field label="City" error={errors.shippingCity?.message}>
               <Input
                 {...register("shippingCity")}
                 placeholder="Accra"
-                className="h-11 bg-surface"
+                className="bg-surface"
               />
             </Field>
-            <Field label="Country code" error={errors.shippingCountry?.message}>
+            <Field label="Country" error={errors.shippingCountry?.message}>
               <Input
                 {...register("shippingCountry")}
-                maxLength={2}
-                placeholder="GH"
                 className="h-11 bg-surface font-mono uppercase tracking-widest"
               />
             </Field>
@@ -175,81 +182,40 @@ export default function CheckoutPage() {
           <div className="pt-2">
             <Button
               type="submit"
-              size="lg"
-              className="w-full gap-2 sm:w-auto"
               disabled={loading}
+              className="h-11 w-full font-mono uppercase tracking-widest"
             >
-              {loading ? (
-                "Placing order…"
-              ) : (
-                <>
-                  Place order · {formatCurrency(totalPrice(), currency)}
-                  <ArrowUpRight className="h-4 w-4" strokeWidth={1.6} />
-                </>
-              )}
+              {loading ? "Placing order…" : "Place order"}
             </Button>
           </div>
         </form>
 
         {/* Order summary */}
-        <aside>
-          <div className="rounded-md border border-border bg-surface p-6">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
-              Order summary
-            </p>
-            <ul className="mt-5 divide-y divide-border">
-              {items.map((item) => (
-                <li key={item.artworkId} className="flex items-baseline justify-between gap-4 py-3.5">
-                  <span className="line-clamp-1 text-[13.5px] text-ink">{item.title}</span>
-                  <span className="shrink-0 font-mono text-[12.5px] tabular-nums text-ink">
-                    {formatCurrency(item.price, item.currency)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
-              <span className="text-[13px] text-ink-muted">Total</span>
-              <span className="font-mono text-[18px] tabular-nums text-ink">
-                {formatCurrency(totalPrice(), currency)}
-              </span>
-            </div>
+        <aside className="h-fit rounded-md border border-border bg-surface p-5">
+          <p className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+            Order summary
+          </p>
+          <div className="space-y-3">
+            {items.map((item) => (
+              <div key={item.artworkId} className="flex items-start gap-3 text-[13.5px]">
+                <div className="flex-1 text-ink leading-snug">{item.title}</div>
+                <div className="shrink-0 tabular-nums text-ink-muted">
+                  {formatCurrency(item.price * item.quantity, item.currency)}
+                </div>
+              </div>
+            ))}
           </div>
-
-          <p className="mt-4 text-[12px] leading-relaxed text-ink-soft">
-            This total is indicative. Shipping costs, if any, will be agreed
-            directly with the artist after you place your order.
+          <div className="mt-4 border-t border-border pt-4 flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">Total</span>
+            <span className="font-display text-[17px] font-semibold text-ink tabular-nums">
+              {formatCurrency(totalPrice, currency)}
+            </span>
+          </div>
+          <p className="mt-3 text-[11.5px] text-ink-soft leading-relaxed">
+            Payment is collected by the artist directly. Ato&apos;s Art facilitates the order only.
           </p>
         </aside>
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  sublabel,
-  error,
-  children,
-}: {
-  label: string;
-  sublabel?: string;
-  error: string | undefined;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="flex items-baseline gap-2 text-[12.5px] text-ink-muted">
-        {label}
-        {sublabel && (
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-ink-soft">
-            {sublabel}
-          </span>
-        )}
-      </Label>
-      {children}
-      {error && (
-        <p className="text-[12px] text-brick">{error}</p>
-      )}
     </div>
   );
 }

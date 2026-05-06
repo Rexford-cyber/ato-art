@@ -20,13 +20,8 @@ const statusStyle: Record<string, string> = {
 };
 
 const statusLabel: Record<string, string> = {
-  PENDING:    "Pending",
-  PROCESSING: "Processing",
-  PAID:       "Paid",
-  SHIPPED:    "Shipped",
-  DELIVERED:  "Delivered",
-  CANCELLED:  "Cancelled",
-  REFUNDED:   "Refunded",
+  PENDING: "Pending", PROCESSING: "Processing", PAID: "Paid",
+  SHIPPED: "Shipped", DELIVERED: "Delivered", CANCELLED: "Cancelled", REFUNDED: "Refunded",
 };
 
 export default async function BuyerOrdersPage() {
@@ -49,9 +44,7 @@ export default async function BuyerOrdersPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">
-          Account
-        </p>
+        <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">Account</p>
         <h1 className="font-display mt-2 text-[clamp(1.7rem,3vw,2.2rem)] font-semibold leading-[1.06] tracking-[-0.018em] text-ink">
           My orders
         </h1>
@@ -62,16 +55,9 @@ export default async function BuyerOrdersPage() {
 
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-md border border-border bg-surface py-20 text-center">
-          <p className="font-display text-[18px] font-semibold text-ink">
-            No orders yet.
-          </p>
-          <p className="mt-1.5 text-[13.5px] text-ink-muted">
-            Browse the collection and buy your first piece.
-          </p>
-          <Link
-            href="/artworks"
-            className="mt-5 inline-flex items-center gap-1 text-[13.5px] text-ink underline underline-offset-[3px] decoration-1 decoration-ink-soft transition-colors hover:decoration-accent"
-          >
+          <p className="font-display text-[18px] font-semibold text-ink">No orders yet.</p>
+          <p className="mt-1.5 text-[13.5px] text-ink-muted">Browse the collection and buy your first piece.</p>
+          <Link href="/artworks" className="mt-5 inline-flex items-center gap-1 text-[13.5px] text-ink underline underline-offset-[3px] decoration-1 decoration-ink-soft transition-colors hover:decoration-accent">
             Browse art
             <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
           </Link>
@@ -86,49 +72,36 @@ export default async function BuyerOrdersPage() {
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <div className="flex items-baseline gap-4">
-                    <span className="font-mono text-[12.5px] tabular-nums text-ink">
-                      {order.orderNumber}
-                    </span>
-                    <span className="text-[12px] text-ink-soft">
-                      {format(order.createdAt, "d MMM yyyy")}
-                    </span>
+                    <span className="font-mono text-[12.5px] tabular-nums text-ink">{order.orderNumber}</span>
+                    <span className="text-[12px] text-ink-soft">{format(order.createdAt, "d MMM yyyy")}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`inline-flex items-center rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] ${statusStyle[order.status] ?? "border-border text-ink-soft"}`}
-                    >
-                      {statusLabel[order.status] ?? order.status}
-                    </span>
                     <span className="font-mono text-[13px] tabular-nums text-ink">
-                      {formatCurrency(order.total, order.currency)}
+                      {formatCurrency(Number(order.total), order.currency ?? "GHS")}
+                    </span>
+                    <span className={`inline-flex items-center rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] ${statusStyle[order.status] ?? "border-border text-ink-soft"}`}>
+                      {statusLabel[order.status] ?? order.status.toLowerCase()}
                     </span>
                   </div>
                 </div>
-
-                {/* Artwork thumbnails */}
-                <div className="mt-4 flex items-center gap-2">
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="relative h-14 w-14 overflow-hidden rounded-sm bg-muted"
-                    >
-                      {item.artwork.images[0] && (
-                        <Image
-                          src={item.artwork.images[0].url}
-                          alt={item.artworkTitle}
-                          fill
-                          unoptimized={item.artwork.images[0].url.startsWith("http")}
-                          className="object-cover"
-                          sizes="56px"
-                        />
-                      )}
-                    </div>
-                  ))}
-                  <ArrowUpRight
-                    className="ml-auto h-4 w-4 text-ink-soft transition-transform duration-[240ms] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
-                    strokeWidth={1.6}
-                  />
-                </div>
+                {order.items.length > 0 && (
+                  <div className="mt-3 flex gap-2">
+                    {order.items.map((item) =>
+                      item.artwork.images[0] ? (
+                        <div key={item.id} className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm bg-muted">
+                          <Image
+                            src={item.artwork.images[0].url}
+                            alt={item.artworkTitle}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                            unoptimized
+                          />
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                )}
               </Link>
             </li>
           ))}

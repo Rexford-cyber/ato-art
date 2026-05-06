@@ -38,7 +38,6 @@ export default async function ArtistDashboardPage() {
 
   return (
     <div className="max-w-3xl space-y-10">
-      {/* Greeting */}
       <div className="flex items-start justify-between gap-6">
         <div>
           <p className="font-mono text-[11.5px] uppercase tracking-[0.16em] text-ink-soft">
@@ -56,33 +55,17 @@ export default async function ArtistDashboardPage() {
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Approved works"
-          value={String(counts.APPROVED ?? 0)}
-          sub={`${counts.PENDING ?? 0} pending review`}
-        />
-        <StatCard
-          label="Pieces sold"
-          value={String(profile?.totalSales ?? 0)}
-          sub="all time"
-        />
-        <StatCard
-          label="Earnings"
-          value={formatCurrency(Number(profile?.totalEarnings ?? 0), "GHS")}
-          sub="after 15% fee"
-          mono
-        />
+        <StatCard label="Approved works" value={String(counts.APPROVED ?? 0)} sub={`${counts.PENDING ?? 0} pending review`} />
+        <StatCard label="Pieces sold" value={String(profile?.totalSales ?? 0)} sub="all time" />
+        <StatCard label="Earnings" value={formatCurrency(Number(profile?.totalEarnings ?? 0), "GHS")} sub="after 15% fee" mono />
       </div>
 
-      {/* Pending notice */}
       {(counts.PENDING ?? 0) > 0 && (
         <div className="rounded-md border border-ochre/40 bg-ochre/8 px-5 py-4">
           <p className="text-[13.5px] text-ink">
             <span className="font-medium">{counts.PENDING} {counts.PENDING === 1 ? "artwork" : "artworks"}</span>
-            {" "}pending admin review.
-            {" "}
+            {" "}pending admin review.{" "}
             <Link href="/artist/artworks" className="text-ink underline decoration-1 underline-offset-[3px] decoration-ink-soft transition-colors hover:decoration-accent">
               View your artworks
             </Link>
@@ -90,34 +73,21 @@ export default async function ArtistDashboardPage() {
         </div>
       )}
 
-      {/* Recent sales */}
       <div>
         <div className="flex items-baseline justify-between gap-4">
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
-            Recent sales
-          </p>
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">Recent sales</p>
           {recentOrders.length > 0 && (
-            <Link
-              href="/artist/orders"
-              className="group inline-flex items-center gap-1 text-[12.5px] text-ink-muted transition-colors hover:text-ink"
-            >
+            <Link href="/artist/orders" className="group inline-flex items-center gap-1 text-[12.5px] text-ink-muted transition-colors hover:text-ink">
               All orders
-              <ArrowUpRight
-                className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                strokeWidth={1.6}
-              />
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.6} />
             </Link>
           )}
         </div>
 
         {recentOrders.length === 0 ? (
           <div className="mt-5 rounded-md border border-border bg-surface px-6 py-10 text-center">
-            <p className="font-display text-[16px] font-medium text-ink">
-              No sales yet.
-            </p>
-            <p className="mt-1.5 text-[13.5px] text-ink-muted">
-              Upload work and get it approved to start selling.
-            </p>
+            <p className="font-display text-[16px] font-medium text-ink">No sales yet.</p>
+            <p className="mt-1.5 text-[13.5px] text-ink-muted">Upload work and get it approved to start selling.</p>
             <Button asChild variant="ghost" className="mt-4 gap-1">
               <Link href="/artist/artworks/upload">
                 Upload your first piece
@@ -126,39 +96,25 @@ export default async function ArtistDashboardPage() {
             </Button>
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-md border border-border">
+          <div className="mt-4 overflow-x-auto rounded-md border border-border">
             <table className="w-full text-[13px]">
               <thead className="border-b border-border bg-muted/50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
-                    Order
-                  </th>
-                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
-                    Buyer
-                  </th>
-                  <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
-                    Earnings
-                  </th>
+                  <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">Order</th>
+                  <th className="hidden px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft md:table-cell">Buyer</th>
+                  <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recentOrders.map((order) => {
-                  const earnings = order.items.reduce(
-                    (s, i) => s + Number(i.artistEarnings),
-                    0
-                  );
-                  return (
-                    <tr key={order.id} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3.5 font-mono text-[11.5px] tabular-nums text-ink-soft">
-                        {order.orderNumber}
-                      </td>
-                      <td className="px-4 py-3.5 text-ink">{order.buyer.name}</td>
-                      <td className="px-4 py-3.5 text-right font-mono tabular-nums text-ink">
-                        {formatCurrency(earnings, order.currency)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="transition-colors hover:bg-muted/30">
+                    <td className="px-4 py-3 font-mono text-[12px] tabular-nums text-ink">{order.orderNumber}</td>
+                    <td className="hidden px-4 py-3 text-ink-muted md:table-cell">{order.buyer.name}</td>
+                    <td className="px-4 py-3 text-right font-mono tabular-nums text-ink">
+                      {formatCurrency(order.items.reduce((s, i) => s + Number(i.unitPrice) * i.quantity, 0), "GHS")}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -168,28 +124,12 @@ export default async function ArtistDashboardPage() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  sub,
-  mono = false,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  mono?: boolean;
-}) {
+function StatCard({ label, value, sub, mono = false }: { label: string; value: string; sub: string; mono?: boolean }) {
   return (
     <div className="rounded-md border border-border bg-surface p-5">
-      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">
-        {label}
-      </p>
-      <p
-        className={`mt-3 text-[26px] font-semibold leading-none text-ink ${mono ? "font-mono tabular-nums" : "font-display"}`}
-      >
-        {value}
-      </p>
-      <p className="mt-1.5 text-[12px] text-ink-muted">{sub}</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">{label}</p>
+      <p className={`mt-3 text-[26px] font-semibold leading-none text-ink ${mono ? "font-mono tabular-nums" : "font-display"}`}>{value}</p>
+      <p className="mt-1.5 text-[12px] text-ink-soft">{sub}</p>
     </div>
   );
 }
