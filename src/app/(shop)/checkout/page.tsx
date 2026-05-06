@@ -200,7 +200,7 @@ export default function CheckoutPage() {
           <div className="mt-4 border-t border-border pt-4 flex items-center justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-soft">Total</span>
             <span className="font-display text-[17px] font-semibold text-ink tabular-nums">
-              {formatCurrency(totalPrice, currency)}
+              {formatCurrency(totalPrice(), currency)}
             </span>
           </div>
           <p className="mt-3 text-[11.5px] text-ink-soft leading-relaxed">

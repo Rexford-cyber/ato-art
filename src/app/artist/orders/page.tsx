@@ -81,7 +81,12 @@ export default async function ArtistOrdersPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3.5 text-right">
-                        <UpdateOrderStatus orderId={order.id} currentStatus={order.status} />
+                        {order.status === "PAID" && (
+                          <UpdateOrderStatus orderId={order.id} nextStatus="SHIPPED" label="Mark shipped" />
+                        )}
+                        {order.status === "SHIPPED" && (
+                          <UpdateOrderStatus orderId={order.id} nextStatus="DELIVERED" label="Mark delivered" />
+                        )}
                       </td>
                     </tr>
                   );

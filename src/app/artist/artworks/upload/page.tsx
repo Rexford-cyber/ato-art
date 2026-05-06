@@ -124,13 +124,7 @@ export default function UploadArtworkPage() {
             <Label>Category <span className="text-destructive">*</span></Label>
             <Select onValueChange={(v) => setValue("categoryId", v as string)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category">
-                  {(value: string | null) => {
-                    if (!value) return null;
-                    const cat = categories.find((c: { id: string; name: string }) => c.id === value);
-                    return cat?.name ?? value;
-                  }}
-                </SelectValue>
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c: { id: string; name: string }) => (

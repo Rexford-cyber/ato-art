@@ -57,7 +57,7 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const allowedFields = ["status", "trackingNumber", "adminNote"];
+  const allowedFields = ["status", "trackingNumber"];
   const data: Record<string, unknown> = {};
   for (const key of allowedFields) {
     if (body[key] !== undefined) data[key] = body[key];

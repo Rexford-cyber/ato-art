@@ -131,7 +131,7 @@ export default async function AdminArtworksPage({ searchParams }: PageProps) {
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <Button asChild variant="ghost" size="sm">
-                        <Link href={`/admin/artworks/${artwork.id}`} className="flex items-center gap-1">
+                        <Link href={`/admin/artworks/${artwork.id}/review`} className="flex items-center gap-1">
                           Review <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
                         </Link>
                       </Button>
@@ -147,7 +147,7 @@ export default async function AdminArtworksPage({ searchParams }: PageProps) {
             {artworks.map((artwork) => (
               <Link
                 key={artwork.id}
-                href={`/admin/artworks/${artwork.id}`}
+                href={`/admin/artworks/${artwork.id}/review`}
                 className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 transition-colors hover:bg-muted/40"
               >
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
