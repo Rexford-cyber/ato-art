@@ -18,7 +18,13 @@ export default async function ArtistArtworksPage() {
   const artworks = await prisma.artwork.findMany({
     where: { artistId: session.user.id },
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      price: true,
+      currency: true,
+      moderationNote: true,
       images: { where: { isPrimary: true }, take: 1 },
       category: { select: { name: true } },
     },
@@ -104,8 +110,8 @@ export default async function ArtistArtworksPage() {
                       <ArtworkStatusBadge status={artwork.status} />
                     </td>
                     <td className="hidden px-4 py-3.5 max-w-[180px] lg:table-cell">
-                      {artwork.adminNote ? (
-                        <p className="truncate text-[12.5px] text-ink-muted">{artwork.adminNote}</p>
+                      {artwork.moderationNote ? (
+                        <p className="truncate text-[12.5px] text-ink-muted">{artwork.moderationNote}</p>
                       ) : (
                         <span className="text-[12px] text-ink-soft/50">—</span>
                       )}
