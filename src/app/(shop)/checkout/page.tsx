@@ -134,18 +134,10 @@ export default function CheckoutPage() {
             />
           </Field>
 
-          <Field label="Address line 1" error={errors.shippingAddress1?.message}>
+          <Field label="Address" error={errors.shippingAddress?.message}>
             <Input
-              {...register("shippingAddress1")}
-              placeholder="123 Oxford Street"
-              className="bg-surface"
-            />
-          </Field>
-
-          <Field label="Address line 2" sublabel="Optional" error={errors.shippingAddress2?.message}>
-            <Input
-              {...register("shippingAddress2")}
-              placeholder="Apt, suite, etc."
+              {...register("shippingAddress")}
+              placeholder="123 Oxford Street, Apt 4B"
               className="bg-surface"
             />
           </Field>
