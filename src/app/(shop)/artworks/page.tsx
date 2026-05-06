@@ -91,6 +91,8 @@ export default async function ArtworksPage({ searchParams }: PageProps) {
   }
 
   const hasFilters = !!(params.category || params.medium || params.style || params.q || params.minPrice || params.maxPrice);
+  const activeCount = [params.category, params.medium, params.style, params.q, params.minPrice, params.maxPrice].filter(Boolean).length;
+  const categoryOptions = categories.map((c) => ({ value: c.slug, label: c.name }));
 
   return (
     <div className="flex flex-col">
@@ -132,11 +134,11 @@ export default async function ArtworksPage({ searchParams }: PageProps) {
               />
             </form>
             <MobileFilters
-              categories={categories}
+              categories={categoryOptions}
               mediums={MEDIUMS}
               sorts={SORTS}
-              params={params}
-              buildHref={buildHref}
+              currentParams={params}
+              activeCount={activeCount}
             />
           </div>
         </div>
